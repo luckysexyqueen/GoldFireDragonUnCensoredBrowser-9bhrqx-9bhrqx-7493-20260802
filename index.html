@@ -1,0 +1,707 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=1280"/>
+<meta name="HandheldFriendly" content="false"/>
+<meta name="MobileOptimized" content="false"/>
+<script>
+(function(){
+var vp = document.querySelector('meta[name=viewport]') ||
+document.createElement('meta');
+vp.name = 'viewport';
+var sw = screen.width || window.innerWidth || 375;
+if (sw < 1280) {
+var s = (sw / 1280).toFixed(4);
+vp.content = 'width=1280, initial-scale=' + s + ', minimum-scale=' + s + ', maximum-scale=3.0, user-scalable=yes';
+} else {
+vp.content = 'width=1280, initial-scale=1.0';
+}
+if (!document.querySelector('meta[name=viewport]')) {
+document.head.appendChild(vp);
+}
+})();
+</script>
+<title>FireDragon Browser</title>
+
+<!-- SEO / Social -->
+<meta name="description" content="빠르고 안전한 프리미엄 브라우저 — FireDragon"/>
+<meta property="og:title" content="FireDragon Browser"/>
+<meta property="og:description" content="빠르고 안전한 프리미엄 브라우저"/>
+<meta property="og:url" content="https://www.onspace.ai"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="FireDragon"/>
+<meta property="og:image" content="https://cdn-ai.onspace.ai/onspace/project/screenshot/online/pre-site/9bhrqx.jpg"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="FireDragon Browser"/>
+<meta name="twitter:description" content="빠르고 안전한 프리미엄 브라우저"/>
+<meta name="twitter:image" content="https://cdn-ai.onspace.ai/onspace/project/screenshot/online/pre-site/9bhrqx.jpg"/>
+<meta name="twitter:url" content="https://www.onspace.ai"/>
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+font-family: Arial, sans-serif;
+background: #0a0010
+url('https://cdn-ai.onspace.ai/onspace/project/uploads/6SC2bAVvqSFMEGrGCS7FCM/GoldFireDragonBrowser_home_page.jpg')
+center / cover no-repeat fixed;
+margin: 0;
+padding: 0;
+min-height: 100vh;
+color: #e9d5ff;
+}
+
+/* ── Search bar ── */
+.search-bar {
+border: 1px solid rgba(192,132,252,0.6);
+border-radius: 9999px;
+background: rgba(12,4,28,0.82);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+transition: box-shadow 0.25s, border-color 0.25s;
+}
+.search-bar:focus-within {
+border-color: #c084fc;
+box-shadow: 0 0 30px rgba(192,132,252,0.7);
+}
+
+/* ── Suggestions dropdown ── */
+#suggestions {
+background: rgba(12,4,28,0.95);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+border: 1px solid rgba(192,132,252,0.4);
+border-top: none;
+border-radius: 0 0 1.5rem 1.5rem;
+overflow: hidden;
+}
+#suggestions li {
+padding: 10px 20px;
+cursor: pointer;
+color: #d8b4fe;
+font-size: 14px;
+display: flex;
+align-items: center;
+gap: 10px;
+transition: background 0.15s;
+}
+#suggestions li:hover { background: rgba(192,132,252,0.15); }
+
+/* ── Toggle button ── */
+#toggle-main-btn {
+width: 44px; height: 44px;
+background: rgba(12,4,28,0.95);
+border: 2px solid #c084fc;
+border-radius: 50%;
+font-size: 20px;
+cursor: pointer;
+transition: background 0.25s, transform 0.2s;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+}
+#toggle-main-btn:hover {
+background: #a855f7;
+transform: scale(1.12);
+}
+
+/* ── Hidden state — visibility 방식으로 공간 유지, 나머지 UI 고정 ── */
+#main-content.is-hidden {
+visibility: hidden;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.25s;
+}
+#main-content {
+transition: opacity 0.25s;
+}
+
+/* ── Japan WiFi badge ── */
+.japan-wifi {
+background: linear-gradient(90deg,#22c55e,#86efac);
+color: #052e16;
+padding: 4px 14px;
+border-radius: 9999px;
+font-size: 12px;
+font-weight: 900;
+box-shadow: 0 0 16px #22c55e88;
+pointer-events: none;
+white-space: nowrap;
+flex-shrink: 0;
+}
+
+/* ── Apps popup ── */
+#apps-popup {
+display: none;
+position: fixed;
+top: 60px;
+right: 16px;
+background: rgba(12,4,28,0.97);
+border: 1px solid rgba(192,132,252,0.4);
+border-radius: 16px;
+padding: 16px;
+z-index: 600;
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+width: 280px;
+box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+#apps-popup.open { display: block; }
+.app-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.app-item {
+display: flex; flex-direction: column; align-items: center; gap: 4px;
+padding: 10px 6px;
+border-radius: 12px;
+color: #d8b4fe;
+font-size: 11px;
+text-decoration: none;
+transition: background 0.15s;
+}
+.app-item:hover { background: rgba(192,132,252,0.2); color: #fff; }
+.app-item i { font-size: 22px; }
+
+/* ── Voice modal ── */
+#voice-modal {
+display: none;
+position: fixed; inset: 0;
+background: rgba(0,0,0,0.75);
+z-index: 900;
+align-items: center;
+justify-content: center;
+}
+#voice-modal.open { display: flex; }
+.voice-ring {
+width: 100px; height: 100px;
+border-radius: 50%;
+background: rgba(192,132,252,0.15);
+border: 3px solid #c084fc;
+display: flex; align-items: center; justify-content: center;
+animation: pulse-ring 1.2s ease-in-out infinite;
+}
+.voice-ring.listening {
+background: rgba(192,132,252,0.3);
+box-shadow: 0 0 40px rgba(192,132,252,0.8);
+}
+@keyframes pulse-ring {
+0%,100% { transform: scale(1); }
+50%      { transform: scale(1.1); }
+}
+/* ── Responsive ── */
+@media (max-width: 640px) {
+.japan-wifi { font-size: 10px; padding: 3px 10px; }
+}
+</style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+<!-- Voice Search Modal -->
+<div id="voice-modal" role="dialog" aria-modal="true" aria-label="음성 검색">
+<div class="flex flex-col items-center gap-6 p-10 rounded-3xl" style="background:rgba(12,4,28,0.97);border:1px solid rgba(192,132,252,0.4);backdrop-filter:blur(24px)">
+<p id="voice-status" class="text-purple-300 text-base">마이크 버튼을 누르세요</p>
+<button id="voice-start-btn" class="voice-ring" title="녹음 시작" aria-label="음성 입력 시작">
+<i class="fa-solid fa-microphone text-4xl text-purple-300"></i>
+</button>
+<p id="voice-interim" class="text-white text-sm min-h-[24px] text-center"></p>
+<button id="voice-close-btn" class="text-purple-400 hover:text-white text-sm underline transition">
+닫기
+</button>
+</div>
+</div>
+
+<!-- ════════════ TOP NAV ════════════ -->
+<header class="flex justify-between items-center px-4 py-3 gap-2 z-50 flex-wrap" style="background: linear-gradient(to bottom, rgba(0,0,0,0.88), transparent);">
+
+<!-- Japan WiFi Badge (left side) -->
+<div class="japan-wifi">🇯🇵 Japan WiFi IP Connected • Proxy Active</div>
+<div style="background:linear-gradient(90deg,#dc2626,#f97316);color:#fff;padding:4px 14px;border-radius:9999px;font-size:12px;font-weight:900;box-shadow:0 0 16px #dc262688;pointer-events:none;white-space:nowrap;flex-shrink:0">🔓 UNCENSORED</div>
+
+<div class="flex items-center gap-2 flex-wrap justify-end">
+
+<a href="https://mail.google.com/?hl=ko&amp;m=0" target="_blank" class="text-sm text-purple-300 hover:text-white px-2 py-1 rounded hover:bg-white/10 transition whitespace-nowrap">Gmail</a>
+<a href="https://images.google.co.jp/search?hl=ko&amp;gl=jp&amp;safe=off&amp;m=0" target="_blank" class="text-sm text-purple-300 hover:text-white px-2 py-1 rounded hover:bg-white/10 transition whitespace-nowrap">이미지</a>
+<a href="https://news.google.co.jp/topstories?hl=ko&amp;gl=JP&amp;ceid=JP:ko&amp;m=0" target="_blank" class="text-sm text-purple-300 hover:text-white px-2 py-1 rounded hover:bg-white/10 transition whitespace-nowrap">뉴스</a>
+<a href="https://maps.google.co.jp/?hl=ko&amp;gl=jp&amp;m=0" target="_blank" class="text-sm text-purple-300 hover:text-white px-2 py-1 rounded hover:bg-white/10 transition whitespace-nowrap">지도</a>
+
+<!-- Apps Grid Button -->
+<button id="apps-btn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition" title="앱 목록">
+<i class="fa-solid fa-grip text-purple-300 text-lg"></i>
+</button>
+
+<!-- Visibility Toggle -->
+<button id="toggle-main-btn" title="검색창 숨기기 / 보이기">👁️</button>
+
+<!-- Profile Avatar -->
+<img src="https://cdn-ai.onspace.ai/onspace/project/uploads/cNeEsZ2cuNyHxmYfJ3dhx6/GoldFireDragonBrowser_logo-removebg-preview.png" class="w-9 h-9 rounded-full cursor-pointer object-cover border-2 border-purple-500 hover:border-purple-300 transition" alt="FireDragon 계정" title="FireDragon 계정" loading="lazy"/>
+</div>
+</header>
+
+<!-- ════════════ APPS POPUP ════════════ -->
+<div id="apps-popup" role="dialog" aria-label="앱 목록">
+<p class="text-purple-400 text-xs mb-3 font-semibold tracking-wide">빠른 링크</p>
+<div class="app-grid">
+<a href="https://mail.google.com/?hl=ko&amp;m=0" target="_blank" class="app-item"><i class="fa-solid fa-envelope"></i>Gmail</a>
+<a href="https://maps.google.co.jp/?hl=ko&amp;gl=jp&amp;m=0" target="_blank" class="app-item"><i class="fa-solid fa-map-location-dot"></i>지도</a>
+<a href="https://www.youtube.co.jp/?gl=JP&amp;hl=ko&amp;app=desktop" target="_blank" class="app-item"><i class="fa-brands fa-youtube"></i>YouTube</a>
+<a href="https://news.google.co.jp/topstories?hl=ko&amp;gl=JP&amp;ceid=JP:ko&amp;m=0" target="_blank" class="app-item"><i class="fa-solid fa-newspaper"></i>뉴스</a>
+<a href="https://translate.google.co.jp/?hl=ko&amp;sl=auto&amp;tl=ko&amp;m=0" target="_blank" class="app-item"><i class="fa-solid fa-language"></i>번역</a>
+<a href="https://drive.google.co.jp/?hl=ko&amp;m=0" target="_blank" class="app-item"><i class="fa-brands fa-google-drive"></i>드라이브</a>
+<a href="https://calendar.google.co.jp/?hl=ko&amp;m=0" target="_blank" class="app-item"><i class="fa-solid fa-calendar-days"></i>캘린더</a>
+<a href="https://photos.google.co.jp/?hl=ko&amp;m=0" target="_blank" class="app-item"><i class="fa-solid fa-images"></i>포토</a>
+<a href="https://meet.google.co.jp/?hl=ko&amp;m=0" target="_blank" class="app-item"><i class="fa-solid fa-video"></i>Meet</a>
+</div>
+</div>
+
+<!-- ════════════ MAIN CONTENT ════════════ -->
+<main id="main-content" class="flex-1 flex flex-col items-center justify-center px-4 py-10">
+
+<!-- Logo &amp; Brand -->
+<div class="mb-8 text-center select-none">
+<img src="https://cdn-ai.onspace.ai/onspace/project/uploads/cNeEsZ2cuNyHxmYfJ3dhx6/GoldFireDragonBrowser_logo-removebg-preview.png" style="width: clamp(90px,16vw,160px);" class="mx-auto drop-shadow-lg" draggable="false" alt="FireDragon Logo"/>
+<h1 class="text-4xl md:text-5xl font-black tracking-widest mt-5 text-white drop-shadow-lg">
+GoldFireDragon
+</h1>
+<p class="text-purple-300 text-sm mt-1">빠르고 안전한 무검열 브라우저 — <span style="color:#4ade80;font-weight:800;">완전 무료</span></p>
+</div>
+
+<!-- Search Bar + Suggestions -->
+<div class="w-full max-w-[680px] relative">
+<div class="search-bar flex items-center px-5 py-3">
+<i class="fa-solid fa-magnifying-glass text-lg text-purple-400 mr-4 flex-shrink-0"></i>
+<input id="search-input" type="text" class="flex-1 bg-transparent outline-none text-base md:text-lg
+placeholder:text-purple-400 text-purple-100 min-w-0" placeholder="검색어 또는 URL을 입력하세요" autocomplete="off" aria-label="검색어 입력"/>
+<button id="clear-btn" class="hidden text-lg text-purple-300 hover:text-white mr-3 flex-shrink-0" title="지우기" aria-label="검색어 지우기">✕</button>
+<button id="voice-btn" class="text-lg text-purple-400 hover:text-white mr-3 flex-shrink-0 transition" title="음성 검색" aria-label="음성 검색">
+<i class="fa-solid fa-microphone"></i>
+</button>
+<button id="lens-btn" class="text-lg text-purple-400 hover:text-white flex-shrink-0 transition" title="Google Lens 이미지 검색" aria-label="Google Lens 이미지 검색">
+<i class="fa-solid fa-camera"></i>
+</button>
+</div>
+
+<!-- Autocomplete Suggestions -->
+<ul id="suggestions" class="hidden absolute left-0 right-0 z-50" role="listbox"></ul>
+</div>
+
+<!-- Engine Selector -->
+<div class="flex justify-center gap-2 mt-4 flex-wrap" id="engine-tabs">
+<button data-engine="google" class="engine-tab active-tab px-4 py-1.5 rounded-full text-xs font-bold border border-purple-500 bg-purple-600 text-white transition-all">
+🇯🇵 Google JP
+</button>
+<button data-engine="powersearch" class="engine-tab px-4 py-1.5 rounded-full text-xs font-bold border border-amber-500/50 text-amber-300 hover:bg-amber-700/20 transition-all">
+⚡ PowerSearch
+</button>
+<button data-engine="gibiru" class="engine-tab px-4 py-1.5 rounded-full text-xs font-bold border border-purple-500/40 text-purple-300 hover:bg-purple-700/30 transition-all">
+🔓 Gibiru 무검열
+</button>
+<button data-engine="ddg" class="engine-tab px-4 py-1.5 rounded-full text-xs font-bold border border-purple-500/40 text-purple-300 hover:bg-purple-700/30 transition-all">
+🦆 DuckDuckGo
+</button>
+<button data-engine="brave" class="engine-tab px-4 py-1.5 rounded-full text-xs font-bold border border-purple-500/40 text-purple-300 hover:bg-purple-700/30 transition-all">
+🦁 Brave
+</button>
+</div>
+
+<!-- Action Buttons -->
+<div class="flex justify-center gap-4 mt-4 flex-wrap">
+<button id="search-btn" class="px-8 py-3 bg-purple-600 hover:bg-purple-700 active:scale-95
+rounded-xl text-sm font-semibold transition-all
+shadow-lg shadow-purple-900/50 focus:outline-none focus:ring-2 focus:ring-purple-400">
+FireDragon 검색
+</button>
+<button id="lucky-btn" class="px-8 py-3 bg-transparent border border-purple-400
+hover:bg-purple-500/20 active:scale-95 rounded-xl text-sm font-semibold
+transition-all focus:outline-none focus:ring-2 focus:ring-purple-400">
+I&#39;m Feeling Lucky
+</button>
+<button id="bypass-btn" class="px-8 py-3 bg-gradient-to-r from-red-700 to-orange-600 hover:from-red-600 hover:to-orange-500
+active:scale-95 rounded-xl text-sm font-semibold transition-all
+shadow-lg shadow-red-900/50 focus:outline-none focus:ring-2 focus:ring-red-400">
+🔓 우회검색
+</button>
+<a href="/unblock" class="px-8 py-3 bg-gradient-to-r from-violet-700 to-purple-600 hover:from-violet-600 hover:to-purple-500
+active:scale-95 rounded-xl text-sm font-semibold transition-all
+shadow-lg shadow-violet-900/50 focus:outline-none focus:ring-2 focus:ring-violet-400
+text-white no-underline flex items-center gap-2">
+🌐 막힌사이트 열기
+</a>
+</div>
+
+<!-- Bypass Result -->
+<div id="bypass-result" class="hidden w-full max-w-[680px] mt-4 p-4 rounded-2xl text-sm" style="background:rgba(12,4,28,0.92);border:1px solid rgba(220,38,38,0.5);">
+<p class="text-red-400 font-bold mb-3">🔓 무검열 우회 링크</p>
+<div id="bypass-links" class="flex flex-col gap-2"></div>
+</div>
+
+<!-- Quick Links -->
+<nav class="mt-12 flex gap-5 flex-wrap justify-center" aria-label="빠른 링크">
+<a href="https://mail.google.com/?hl=ko&amp;m=0" target="_blank" class="flex flex-col items-center gap-2 text-purple-300 hover:text-white transition group">
+<div class="w-12 h-12 rounded-2xl bg-white/10 group-hover:bg-purple-600/40 flex items-center justify-center transition">
+<i class="fa-solid fa-envelope text-xl"></i>
+</div>
+<span class="text-xs">Gmail</span>
+</a>
+<a href="https://maps.google.co.jp/?hl=ko&amp;gl=jp&amp;m=0" target="_blank" class="flex flex-col items-center gap-2 text-purple-300 hover:text-white transition group">
+<div class="w-12 h-12 rounded-2xl bg-white/10 group-hover:bg-purple-600/40 flex items-center justify-center transition">
+<i class="fa-solid fa-map-location-dot text-xl"></i>
+</div>
+<span class="text-xs">지도</span>
+</a>
+<a href="https://news.google.co.jp/topstories?hl=ko&amp;gl=JP&amp;ceid=JP:ko&amp;m=0" target="_blank" class="flex flex-col items-center gap-2 text-purple-300 hover:text-white transition group">
+<div class="w-12 h-12 rounded-2xl bg-white/10 group-hover:bg-purple-600/40 flex items-center justify-center transition">
+<i class="fa-solid fa-newspaper text-xl"></i>
+</div>
+<span class="text-xs">뉴스</span>
+</a>
+<a href="https://www.youtube.co.jp/?gl=JP&amp;hl=ko&amp;app=desktop" target="_blank" class="flex flex-col items-center gap-2 text-purple-300 hover:text-white transition group">
+<div class="w-12 h-12 rounded-2xl bg-white/10 group-hover:bg-purple-600/40 flex items-center justify-center transition">
+<i class="fa-brands fa-youtube text-xl"></i>
+</div>
+<span class="text-xs">YouTube</span>
+</a>
+<a href="https://translate.google.co.jp/?hl=ko&amp;sl=auto&amp;tl=ko&amp;m=0" target="_blank" class="flex flex-col items-center gap-2 text-purple-300 hover:text-white transition group">
+<div class="w-12 h-12 rounded-2xl bg-white/10 group-hover:bg-purple-600/40 flex items-center justify-center transition">
+<i class="fa-solid fa-language text-xl"></i>
+</div>
+<span class="text-xs">번역</span>
+</a>
+</nav>
+</main>
+
+<!-- ════════════ FOOTER ════════════ -->
+<footer class="py-5 text-center text-xs text-purple-500 border-t border-purple-900/30" style="background: rgba(0,0,0,0.65);">
+<nav class="flex justify-center gap-6 mb-2" aria-label="하단 링크">
+<a href="#" class="hover:text-purple-300 transition">개인정보처리방침</a>
+<a href="#" class="hover:text-purple-300 transition">서비스 약관</a>
+<a href="#" class="hover:text-purple-300 transition">설정</a>
+</nav>
+<span>🇯🇵 일본 • 🔓 무검열 • ✅ 완전무료 • FireDragon 135.0</span>
+</footer>
+
+<!-- ════════════ SCRIPTS ════════════ -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+/* ── DOM refs ── */
+var input       = document.getElementById('search-input');
+var clearBtn    = document.getElementById('clear-btn');
+var searchBtn   = document.getElementById('search-btn');
+var luckyBtn    = document.getElementById('lucky-btn');
+var toggleBtn   = document.getElementById('toggle-main-btn');
+var mainContent = document.getElementById('main-content');
+var appsBtn     = document.getElementById('apps-btn');
+var appsPopup   = document.getElementById('apps-popup');
+var suggestions = document.getElementById('suggestions');
+
+var isHidden = false;
+
+/* ── 로고 + 검색바 ON/OFF ── */
+toggleBtn.addEventListener('click', function () {
+isHidden = !isHidden;
+mainContent.classList.toggle('is-hidden', isHidden);
+toggleBtn.innerHTML = isHidden ? '🔄' : '👁️';
+});
+
+/* ── Apps popup ── */
+appsBtn.addEventListener('click', function (e) {
+e.stopPropagation();
+appsPopup.classList.toggle('open');
+});
+document.addEventListener('click', function () {
+appsPopup.classList.remove('open');
+});
+appsPopup.addEventListener('click', function (e) { e.stopPropagation(); });
+
+var voiceModal    = document.getElementById('voice-modal');
+var voiceStartBtn = document.getElementById('voice-start-btn');
+var voiceCloseBtn = document.getElementById('voice-close-btn');
+var voiceStatus   = document.getElementById('voice-status');
+var voiceInterim  = document.getElementById('voice-interim');
+var voiceBtn      = document.getElementById('voice-btn');
+var lensBtn       = document.getElementById('lens-btn');
+
+/* ── 검색엔진 선택 ── */
+var currentEngine = 'google';
+var engineTabs = document.querySelectorAll('.engine-tab');
+engineTabs.forEach(function(tab) {
+tab.addEventListener('click', function() {
+currentEngine = this.dataset.engine;
+engineTabs.forEach(function(t) {
+t.classList.remove('active-tab', 'bg-purple-600', 'text-white', 'border-purple-500');
+t.classList.add('border-purple-500/40', 'text-purple-300');
+});
+this.classList.add('active-tab', 'bg-purple-600', 'text-white', 'border-purple-500');
+this.classList.remove('border-purple-500/40', 'text-purple-300');
+document.getElementById('bypass-result').classList.add('hidden');
+input.focus();
+});
+});
+
+/* ── 검색 실행 ── */
+function openSearch(query, lucky) {
+query = (query || '').trim();
+if (!query) { input.focus(); return; }
+
+var isURL = /^https?:\/\//i.test(query) ||
+/^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/.*)?$/.test(query);
+if (isURL) {
+var url = /^https?:\/\//i.test(query) ? query : 'https://' + query;
+window.open(url, '_blank');
+return;
+}
+
+var urls = {
+google:      '/search?q=' + encodeURIComponent(query) + '&engine=searxng',
+powersearch: '/search?q=' + encodeURIComponent(query) + '&engine=powersearch',
+gibiru:      '/search?q=' + encodeURIComponent(query) + '&engine=gibiru',
+ddg:         '/search?q=' + encodeURIComponent(query) + '&engine=ddg',
+brave:       '/search?q=' + encodeURIComponent(query) + '&engine=brave',
+};
+
+if (lucky) {
+window.open('https://www.google.co.jp/search?q=' + encodeURIComponent(query) +
+'&gl=jp&hl=ko&safe=off&pws=0&nfpr=1&btnI=1', '_blank');
+return;
+}
+
+window.open(urls[currentEngine] || urls.google, '_blank');
+}
+
+searchBtn.addEventListener('click', function () { openSearch(input.value, false); });
+luckyBtn.addEventListener('click',  function () { openSearch(input.value, true);  });
+input.addEventListener('keydown', function (e) {
+if (e.key === 'Enter') { openSearch(input.value, false); hideSuggestions(); }
+if (e.key === 'Escape') { hideSuggestions(); }
+});
+
+/* ── 우회검색 (서버사이드 무검열 프록시) ── */
+var bypassBtn    = document.getElementById('bypass-btn');
+var bypassResult = document.getElementById('bypass-result');
+var bypassLinks  = document.getElementById('bypass-links');
+
+bypassBtn.addEventListener('click', function() {
+var query = input.value.trim();
+if (!query) { input.focus(); return; }
+
+bypassBtn.textContent = '⏳ 처리중…';
+bypassBtn.disabled = true;
+
+fetch('/api/uncensored', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ query: query, fullBypass: true })
+})
+.then(function(r) { return r.json(); })
+.then(function(data) {
+bypassLinks.innerHTML = '';
+var links = [
+{ label: '🔓 이중우회 (강력추천)', url: data.doubleProxy, color: '#f97316' },
+{ label: '🌐 우회 1 (CroxyProxy)', url: data.proxies[0], color: '#a855f7' },
+{ label: '🌐 우회 2 (Blockaway)',  url: data.proxies[1], color: '#a855f7' },
+{ label: '🌐 우회 3 (ProxySite)',  url: data.proxies[2], color: '#a855f7' },
+{ label: '🇯🇵 Google JP safe=off', url: data.engines.googleJP, color: '#22c55e' },
+{ label: '🦆 DuckDuckGo 무검열',  url: data.engines.ddg,      color: '#3b82f6' },
+{ label: '🔓 Gibiru 무검열구글',   url: data.engines.gibiru,   color: '#ef4444' },
+{ label: '🦁 Brave 무검열',        url: data.engines.brave,    color: '#f59e0b' },
+];
+links.forEach(function(lk) {
+if (!lk.url) return;
+var a = document.createElement('a');
+a.href = lk.url;
+a.target = '_blank';
+a.rel = 'noopener';
+a.textContent = lk.label;
+a.style.cssText = 'display:block;padding:8px 14px;border-radius:10px;' +
+'background:rgba(255,255,255,0.05);color:' + lk.color + ';' +
+'text-decoration:none;font-weight:600;border:1px solid rgba(255,255,255,0.1);' +
+'transition:background 0.15s;';
+a.onmouseover = function(){ this.style.background='rgba(255,255,255,0.12)'; };
+a.onmouseout  = function(){ this.style.background='rgba(255,255,255,0.05)'; };
+bypassLinks.appendChild(a);
+});
+bypassResult.classList.remove('hidden');
+})
+.catch(function() {
+bypassLinks.innerHTML = '<span style="color:#ef4444">서버 오류. 잠시 후 다시 시도하세요.</span>';
+bypassResult.classList.remove('hidden');
+})
+.finally(function() {
+bypassBtn.textContent = '🔓 우회검색';
+bypassBtn.disabled = false;
+});
+});
+
+/* ── Google Lens (이미지 검색) ── */
+lensBtn.addEventListener('click', function () {
+window.open('https://lens.google.co.jp/?hl=ko&gl=jp', '_blank');
+});
+
+/* ── 음성 검색 (Web Speech API) ── */
+var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+var recognition = null;
+
+if (SpeechRecognition) {
+recognition = new SpeechRecognition();
+recognition.lang = 'ko-KR';
+recognition.interimResults = true;
+recognition.maxAlternatives = 1;
+
+recognition.onstart = function () {
+voiceStatus.textContent = '듣고 있습니다…';
+voiceStartBtn.classList.add('listening');
+};
+recognition.onresult = function (e) {
+var transcript = '';
+for (var i = e.resultIndex; i < e.results.length; i++) {
+transcript += e.results[i][0].transcript;
+}
+voiceInterim.textContent = transcript;
+if (e.results[e.results.length - 1].isFinal) {
+input.value = transcript;
+clearBtn.classList.remove('hidden');
+closeVoiceModal();
+openSearch(transcript, false);
+}
+};
+recognition.onerror = function (e) {
+voiceStatus.textContent = '오류: ' + (e.error === 'not-allowed' ? '마이크 권한을 허용해주세요' : e.error);
+voiceStartBtn.classList.remove('listening');
+};
+recognition.onend = function () {
+voiceStartBtn.classList.remove('listening');
+if (voiceModal.classList.contains('open')) {
+voiceStatus.textContent = '다시 누르면 재시도합니다';
+}
+};
+} else {
+/* 미지원 브라우저 */
+voiceBtn.title = '이 브라우저는 음성 인식을 지원하지 않습니다';
+voiceBtn.style.opacity = '0.4';
+voiceBtn.style.cursor  = 'not-allowed';
+}
+
+voiceBtn.addEventListener('click', function () {
+if (!recognition) return;
+openVoiceModal();
+});
+
+voiceStartBtn.addEventListener('click', function () {
+if (!recognition) return;
+voiceInterim.textContent = '';
+voiceStatus.textContent  = '듣고 있습니다…';
+try { recognition.start(); } catch(e) {/* 이미 실행 중 */}
+});
+
+voiceCloseBtn.addEventListener('click', closeVoiceModal);
+voiceModal.addEventListener('click', function (e) {
+if (e.target === voiceModal) closeVoiceModal();
+});
+document.addEventListener('keydown', function (e) {
+if (e.key === 'Escape' && voiceModal.classList.contains('open')) closeVoiceModal();
+});
+
+function openVoiceModal() {
+voiceInterim.textContent = '';
+voiceStatus.textContent  = '마이크 버튼을 누르세요';
+voiceModal.classList.add('open');
+}
+function closeVoiceModal() {
+if (recognition) { try { recognition.stop(); } catch(e) {} }
+voiceModal.classList.remove('open');
+voiceStartBtn.classList.remove('listening');
+}
+
+/* ── Clear button ── */
+input.addEventListener('input', function () {
+clearBtn.classList.toggle('hidden', !input.value);
+if (input.value.length >= 2) {
+fetchSuggestions(input.value);
+} else {
+hideSuggestions();
+}
+});
+clearBtn.addEventListener('click', function () {
+input.value = '';
+clearBtn.classList.add('hidden');
+hideSuggestions();
+input.focus();
+});
+
+/* ── Autocomplete suggestions (서버사이드 — Google JP 한국어) ── */
+var suggestTimer  = null;
+var suggestSerial = 0;
+
+function fetchSuggestions(query) {
+clearTimeout(suggestTimer);
+suggestTimer = setTimeout(function () {
+var serial = ++suggestSerial;
+fetch('/api/suggest?q=' + encodeURIComponent(query))
+.then(function(r) { return r.json(); })
+.then(function(items) {
+if (serial !== suggestSerial) return;
+renderSuggestions(Array.isArray(items) ? items : []);
+})
+.catch(function() {});
+}, 220);
+}
+
+function renderSuggestions(items) {
+if (!items.length) { hideSuggestions(); return; }
+suggestions.innerHTML = '';
+items.slice(0, 6).forEach(function (text) {
+var li = document.createElement('li');
+li.setAttribute('role', 'option');
+li.innerHTML = '<i class="fa-solid fa-magnifying-glass text-purple-500"></i><span>' +
+escapeHTML(text) + '</span>';
+li.addEventListener('mousedown', function (e) {
+e.preventDefault();
+input.value = text;
+clearBtn.classList.remove('hidden');
+hideSuggestions();
+openSearch(text, false);
+});
+suggestions.appendChild(li);
+});
+suggestions.classList.remove('hidden');
+}
+
+function hideSuggestions() {
+suggestions.classList.add('hidden');
+suggestions.innerHTML = '';
+}
+
+function escapeHTML(str) {
+return str.replace(/&/g,'&amp;')
+.replace(/</g,'&lt;')
+.replace(/>/g,'&gt;')
+.replace(/"/g,'&quot;');
+}
+
+document.addEventListener('click', function (e) {
+if (!input.contains(e.target) && !suggestions.contains(e.target)) {
+hideSuggestions();
+}
+});
+
+/* ── Auto focus ── */
+input.focus();
+});
+</script>
+<!-- App load signal for OnSpace preview -->
+<script>
+window.onload = function () {
+var d = document.createElement('div');
+d.id = 'appLoadFinished';
+document.body.appendChild(d);
+};
+</script>
+
+
+
+</body></html>
