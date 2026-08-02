@@ -229,8 +229,9 @@
     .nipple .back { opacity: 1 !important; background: rgba(168, 85, 247, 0.4) !important; }
     .nipple .front { opacity: 1 !important; background: #f3e8ff !important; box-shadow: 0 0 15px #a855f7 !important; }
 
-    .fade-transition {
-      transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    /* 강제로 완전히 숨기는 클래스 */
+    .force-hidden {
+      display: none !important;
     }
   </style>
 </head>
@@ -265,8 +266,8 @@
         <a href="https://news.google.com" target="_blank" class="text-sm text-purple-300 hover:text-white px-2 py-1 rounded hover:bg-white/10 transition whitespace-nowrap">뉴스</a>
         <a href="https://maps.google.co.jp" target="_blank" class="text-sm text-purple-300 hover:text-white px-2 py-1 rounded hover:bg-white/10 transition whitespace-nowrap">지도</a>
         <button id="apps-btn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition" title="앱 목록"><i class="fa-solid fa-grip text-purple-300 text-lg"></i></button>
-        <!-- 강제 작동형 숨기기/보이기 버튼 -->
-        <button id="toggle-main-btn" type="button" title="검색창 숨기기 / 보이기">👁️</button>
+        <!-- 검색창 및 로고 토글 버튼 -->
+        <button id="toggle-main-btn" type="button" title="검색창 및 로고 숨기기 / 보이기">👁️</button>
       </div>
     </header>
 
@@ -285,8 +286,8 @@
       </div>
     </div>
 
-    <!-- 메인 검색 컨텐츠 영역 -->
-    <main id="main-content" class="flex-1 flex flex-col items-center justify-center px-4 py-10 fade-transition">
+    <!-- 로고와 검색창이 포함된 메인 컨텐츠 영역 -->
+    <main id="main-content" class="flex-1 flex flex-col items-center justify-center px-4 py-10">
       <div class="mb-8 text-center select-none clickable">
        <img src="https://cdn.jsdelivr.net/gh/luckysexysuccubusqueen135age/GFD@a81b2430450dcf18c49813c55be06c6ee0ad256f/images/GoldFireDragonBrowser_logo_removebg_preview.png" style="width: clamp(90px,16vw,160px); display: block; height: auto; filter: none !important; image-rendering: auto !important;" class="mx-auto drop-shadow-lg" draggable="false" alt="GoldFireDragon Logo">
         <p class="text-purple-300 text-sm mt-1">빠르고 안전한 프리미엄 360° XR 브라우저</p>
@@ -334,7 +335,7 @@
     </main>
 
     <!-- 하단 푸터 영역 -->
-    <footer id="main-footer" class="py-5 text-center text-xs text-purple-500 border-t border-purple-900/30 clickable fade-transition" style="background: rgba(0,0,0,0.65);">
+    <footer id="main-footer" class="py-5 text-center text-xs text-purple-500 border-t border-purple-900/30 clickable" style="background: rgba(0,0,0,0.65);">
       <nav class="flex justify-center gap-6 mb-2" aria-label="하단 링크">
         <a href="javascript:void(0)" class="hover:text-purple-300 transition">개인정보처리방침</a>
         <a href="javascript:void(0)" class="hover:text-purple-300 transition">서비스 약관</a>
@@ -478,7 +479,7 @@
       document.addEventListener('mozfullscreenchange', handleFSChange);
 
       // ==========================================================
-      // [완벽 수정] 숨기기/보이기 버튼 동작 이벤트 (클릭 및 터치 대응)
+      // [실제 작동형] 검색창과 로고 토글 제어 로직
       // ==========================================================
       function handleToggleAction(e) {
         if (e) {
@@ -489,30 +490,18 @@
         isHidden = !isHidden;
 
         if (isHidden) {
-          // 숨기기 실행: 투명도 제거 후 숨김 처리
-          mainContent.style.opacity = '0';
-          mainContent.style.visibility = 'hidden';
-          mainContent.style.pointerEvents = 'none';
+          // 검색창과 로고가 포함된 main 영역을 화면에서 완전히 제거
+          mainContent.classList.add('force-hidden');
+          if (footer) footer.classList.add('force-hidden');
           
-          if (footer) {
-            footer.style.opacity = '0';
-            footer.style.visibility = 'hidden';
-            footer.style.pointerEvents = 'none';
-          }
-          
+          // 눈 감은 아이콘으로 변경
           toggleBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
         } else {
-          // 보이기 실행: 가시성 부여 후 투명도 복원
-          mainContent.style.visibility = 'visible';
-          mainContent.style.pointerEvents = 'auto';
-          mainContent.style.opacity = '1';
+          // 검색창과 로고 다시 표시
+          mainContent.classList.remove('force-hidden');
+          if (footer) footer.classList.remove('force-hidden');
           
-          if (footer) {
-            footer.style.visibility = 'visible';
-            footer.style.pointerEvents = 'auto';
-            footer.style.opacity = '1';
-          }
-          
+          // 기본 눈 아이콘으로 복구
           toggleBtn.innerHTML = '👁️';
         }
       }
