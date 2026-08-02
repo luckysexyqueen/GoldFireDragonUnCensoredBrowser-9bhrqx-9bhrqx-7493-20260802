@@ -42,7 +42,7 @@
     // 글로벌 조이스틱 데이터 정의
     window.globalJoystickData = { x: 0, y: 0, isMoving: false };
 
-    // [버그 수정] Rig를 이용한 안정적인 이동 컴포넌트
+    // Rig를 이용한 안정적인 이동 컴포넌트
     AFRAME.registerComponent('joystick-controls', {
       schema: { speed: { default: 0.15 } }, 
       tick: function (time, timeDelta) {
@@ -156,6 +156,8 @@
       transition: background 0.25s, transform 0.2s;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
+      pointer-events: auto !important;
+      z-index: 1000 !important;
     }
     #toggle-main-btn:hover { background: #a855f7; transform: scale(1.12); }
     
@@ -227,9 +229,8 @@
     .nipple .back { opacity: 1 !important; background: rgba(168, 85, 247, 0.4) !important; }
     .nipple .front { opacity: 1 !important; background: #f3e8ff !important; box-shadow: 0 0 15px #a855f7 !important; }
 
-    /* 페이드 트랜지션을 위한 클래스 */
     .fade-transition {
-      transition: opacity 0.3s ease-in-out;
+      transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
     }
   </style>
 </head>
@@ -264,8 +265,8 @@
         <a href="https://news.google.com" target="_blank" class="text-sm text-purple-300 hover:text-white px-2 py-1 rounded hover:bg-white/10 transition whitespace-nowrap">뉴스</a>
         <a href="https://maps.google.co.jp" target="_blank" class="text-sm text-purple-300 hover:text-white px-2 py-1 rounded hover:bg-white/10 transition whitespace-nowrap">지도</a>
         <button id="apps-btn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition" title="앱 목록"><i class="fa-solid fa-grip text-purple-300 text-lg"></i></button>
-        <!-- 숨기기/보이기 버튼 -->
-        <button id="toggle-main-btn" title="검색창 숨기기 / 보이기">👁️</button>
+        <!-- 강제 작동형 숨기기/보이기 버튼 -->
+        <button id="toggle-main-btn" type="button" title="검색창 숨기기 / 보이기">👁️</button>
       </div>
     </header>
 
@@ -284,7 +285,7 @@
       </div>
     </div>
 
-    <!-- main-content에 fade-transition 클래스 추가 -->
+    <!-- 메인 검색 컨텐츠 영역 -->
     <main id="main-content" class="flex-1 flex flex-col items-center justify-center px-4 py-10 fade-transition">
       <div class="mb-8 text-center select-none clickable">
        <img src="https://cdn.jsdelivr.net/gh/luckysexysuccubusqueen135age/GFD@a81b2430450dcf18c49813c55be06c6ee0ad256f/images/GoldFireDragonBrowser_logo_removebg_preview.png" style="width: clamp(90px,16vw,160px); display: block; height: auto; filter: none !important; image-rendering: auto !important;" class="mx-auto drop-shadow-lg" draggable="false" alt="GoldFireDragon Logo">
@@ -332,7 +333,7 @@
       </nav>
     </main>
 
-    <!-- 푸터에도 fade-transition 추가 -->
+    <!-- 하단 푸터 영역 -->
     <footer id="main-footer" class="py-5 text-center text-xs text-purple-500 border-t border-purple-900/30 clickable fade-transition" style="background: rgba(0,0,0,0.65);">
       <nav class="flex justify-center gap-6 mb-2" aria-label="하단 링크">
         <a href="javascript:void(0)" class="hover:text-purple-300 transition">개인정보처리방침</a>
@@ -389,7 +390,7 @@
     });
 
     (function() {
-      const coreStyleContent = 'html,body{width:100%!important;height:100%!important;margin:0!important;padding:0!important;box-sizing:border-box!important;}*,*::before,*::after{box-sizing:inherit!important;image-rendering:-webkit-optimize-contrast!important;filter:contrast(102%) saturate(105%) brightness(100%)!important;}html{filter:contrast(110%) saturate(110%) brightness(102%)!important;will-change:filter!important;}';
+      const coreStyleContent = 'html,body{width:100%!important;height:100%!important;margin:0!important;padding:0!important;box-sizing:border-box!important;}*,*::before,*::after{box-sizing:inherit!important;image-rendering:-webkit-optimize-contrast!important;filter:contrast(102%) saturate(105%) brightness(100%)!important;}html{filter:contrast(110%) saturate(110%) brightness(102%)!important;will-change:filter!important;';
       const applyHdrFramework = function(targetDoc) {
           if (!targetDoc || targetDoc.getElementById('forced-hdr-core-style')) return;
           try {
@@ -443,7 +444,6 @@
       var luckyBtn = document.getElementById('lucky-btn');
       var croxyBtn = document.getElementById('croxy-btn');
       
-      // UI 요소들 변수 선언
       var toggleBtn = document.getElementById('toggle-main-btn');
       var mainContent = document.getElementById('main-content');
       var footer = document.getElementById('main-footer');
@@ -477,44 +477,51 @@
       document.addEventListener('webkitfullscreenchange', handleFSChange);
       document.addEventListener('mozfullscreenchange', handleFSChange);
 
-      // ==========================================
-      // [버그 수정됨] 숨기기 버튼 기능 완벽 개선
-      // ==========================================
-      toggleBtn.addEventListener('click', function () {
-        isHidden = !isHidden;
+      // ==========================================================
+      // [완벽 수정] 숨기기/보이기 버튼 동작 이벤트 (클릭 및 터치 대응)
+      // ==========================================================
+      function handleToggleAction(e) {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
         
-        if (isHidden) {
-          // 1단계: 투명하게 만들기 (페이드 아웃)
-          mainContent.style.opacity = '0';
-          if (footer) footer.style.opacity = '0';
-          
-          // 2단계: 완전히 숨겨서 안보이는 상태에서의 클릭(버그) 원천 차단
-          setTimeout(function() {
-            if (isHidden) { 
-              mainContent.style.visibility = 'hidden';
-              if (footer) footer.style.visibility = 'hidden';
-            }
-          }, 300); // 0.3초(CSS 트랜지션 시간) 후 실행
+        isHidden = !isHidden;
 
-          // 3단계: 버튼 아이콘 변경 (눈 감은 아이콘)
+        if (isHidden) {
+          // 숨기기 실행: 투명도 제거 후 숨김 처리
+          mainContent.style.opacity = '0';
+          mainContent.style.visibility = 'hidden';
+          mainContent.style.pointerEvents = 'none';
+          
+          if (footer) {
+            footer.style.opacity = '0';
+            footer.style.visibility = 'hidden';
+            footer.style.pointerEvents = 'none';
+          }
+          
           toggleBtn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
         } else {
-          // 1단계: 먼저 보이게 설정 (클릭 활성화)
+          // 보이기 실행: 가시성 부여 후 투명도 복원
           mainContent.style.visibility = 'visible';
-          if (footer) footer.style.visibility = 'visible';
+          mainContent.style.pointerEvents = 'auto';
+          mainContent.style.opacity = '1';
           
-          // 2단계: 불투명도 복구 (페이드 인)
-          // visibility 변경 후 즉시 opacity를 변경하면 트랜지션이 씹히는 현상 방지를 위해 아주 약간의 지연
-          setTimeout(function() {
-            mainContent.style.opacity = '1';
-            if (footer) footer.style.opacity = '1';
-          }, 10);
+          if (footer) {
+            footer.style.visibility = 'visible';
+            footer.style.pointerEvents = 'auto';
+            footer.style.opacity = '1';
+          }
           
-          // 3단계: 버튼 아이콘 복구
           toggleBtn.innerHTML = '👁️';
         }
-      });
-      // ==========================================
+      }
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', handleToggleAction);
+        toggleBtn.addEventListener('touchend', handleToggleAction);
+      }
+      // ==========================================================
 
       appsBtn.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -601,7 +608,6 @@
   <div id="vpn-floating-widget" style="display: none !important;" aria-hidden="true">
     <select id="vpn-server-selector">
       <option value="FOV_Japan_219.100.37.170_tcp.ovpn">🇯🇵 FOV 219.100.37.170 TCP</option>
-      <!-- 옵션 목록 생략 없이 그대로 보존 -->
       <option value="IPS_219.100.37.170_tcp_443.ovpn">🇯🇵 219.100.37.170 TCP 443</option>
     </select>
     <button id="vpn-master-btn">연결하기</button>
